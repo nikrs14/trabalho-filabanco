@@ -70,6 +70,15 @@ int e_obter_prox_num_conta(Escalonador *e) {
      * Returns: conta : int
      * 
     */
+    int check = f_consultar_proxima_chave(&(e->fila[e->atual -1]));
+    while (check == -1) {
+        e->atual++;
+        if (e->atual == 6) {
+            e->atual = 1;
+        }
+        e->cont = e->num[e->atual-1];
+        check = f_consultar_proxima_chave(&(e->fila[e->atual -1]));
+    }
     int conta = f_obter_proxima_chave(&(e->fila[e->atual -1])); // Atribuímos o valor da conta do cidadão baseando-se na chave que ele recebeu
     e->cont--; // Diminuímos o contador visto que f_obter_proxima_chave já removeu o cidadão
     if (e->cont == 0){ // Caso verdade, acabamos de retirar o último da fila, precisamos reinicializar o contador
@@ -205,6 +214,14 @@ int e_conf_por_arquivo(Escalonador *e, char *nome_arq_conf) {
     return 1;
 }
 
+int _e_pegar_prox_conta(Escalonador *e) {
+    int dado = e_obter_prox_num_conta(e);
+    while (dado == -1 && e_consultar_qtde_clientes(e) > 0) {
+        dado = e_obter_prox_num_conta(e);
+    }
+    return dado;
+}
+
 void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
     /**Descrição: Realiza a simulação e salva em um arquivo de saída
      * Autor: Diego, Gabriel e Tobias
@@ -224,9 +241,7 @@ void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
     int caixas[10], operacoes[5], valores[10];
     int i, qtde_operacoes, conta, classe, check, atual;
     float tempo_medias[5];
-
     arq_out = fopen(nome_arq_out, "w");
-
     e_conf_por_arquivo(e, nome_arq_in);
     log_inicializar(&registrador);
 
@@ -240,49 +255,44 @@ void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
     for (i = 0; i < 5; i++) {
         operacoes[i] = 0;
     }
-
-    while (check != -1) {
-        for (i = 0; i < e->caixas; i++){
+    
+    while (e_consultar_qtde_clientes(e) > 0) {
+        for (i = 0; i < e->caixas; i++) {
             caixas[i] = caixas[i] - 1;
-            if (caixas[i] == 0){
-                classe = e->atual;
+            if (caixas[i] <= 0) {
                 qtde_operacoes = e_consultar_prox_qtde_oper(e);
+                classe = e->atual;
                 conta = e_obter_prox_num_conta(e);
-                if (conta == -1){
-                    conta = e_obter_prox_num_conta(e);
-                    classe = e->atual;
+                operacoes[classe - 1] = operacoes[classe - 1] + qtde_operacoes;
+                atual = i + 1;
+                log_registrar(&registrador, conta, classe, timer, atual);
+                switch (classe) {
+                    case 1:
+                        fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Premium cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
+                        break;
+                    case 2:
+                        fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Ouro cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
+                        break;
+                    case 3:
+                        fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Prata cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
+                        break;
+                    case 4:
+                        fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Bronze cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
+                        break;
+                    case 5:
+                        fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Leezu cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
+                        break;
+                    default:
+                        break;
                 }
-                if (conta != -1 && conta != 0){
-                    operacoes[classe - 1] = operacoes[classe - 1] + qtde_operacoes;
-                    atual = i + 1;
-                    log_registrar(&registrador, conta, classe, timer, atual);
-                    switch (classe) {
-                        case 1:
-                            fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Premium cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
-                            break;
-                        case 2:
-                            fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Ouro cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
-                            break;
-                        case 3:
-                            fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Prata cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
-                            break;
-                        case 4:
-                            fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Bronze cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
-                            break;
-                        case 5:
-                            fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Comum cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
-                            break;
-                        default:
-                            break;
-                    }
-                    caixas[i] = qtde_operacoes*e->delta_t;
-                    valores[i] = valores[i] + 1;
-                }
+                caixas[i] = qtde_operacoes*e->delta_t;
+                valores[i] = valores[i] + 1;
             }
-            check = e_consultar_prox_num_conta(e);
         }
         timer++;
+        check = e_consultar_prox_num_conta(e);
     } timer--;
+    
 
     for (i = 0; i < e->caixas; i++) {
         if (maior < caixas[i]) {

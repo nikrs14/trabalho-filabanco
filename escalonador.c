@@ -26,7 +26,7 @@ void e_inicializar (Escalonador *e, int caixas, int delta_t, int n_1, int n_2, i
      * Returns: None
      * 
     */
-    
+    int i;
     e->caixas = caixas;
     e->delta_t = delta_t;
     e->num[0] = n_1;
@@ -61,6 +61,11 @@ int e_inserir_por_fila(Escalonador *e, int classe, int num_conta, int qtde_opera
     return 1;
 }
 
+void _e_atualizar_atual(Escalonador *e) {
+    e->atual++;
+    if (e->atual == 6) e->atual = 1;
+}
+
 int e_obter_prox_num_conta(Escalonador *e) {
     /**Descrição: Retorna o número da conta do próximo cliente a ser atendido de acordo com a Disciplina de Atendimento, retirando-o da sua respectiva fila
      * Autor: Tobias
@@ -70,18 +75,19 @@ int e_obter_prox_num_conta(Escalonador *e) {
      * Returns: conta : int
      * 
     */
-    int check, conta;
+    int check, prim, conta;
+    prim = e->atual;
     check = f_consultar_proxima_chave(&(e->fila[e->atual - 1]));
     while (check == -1) {
-        e->atual++;
-        if (e->atual == 6) e->atual = 1;
+        _e_atualizar_atual(e);
+        if (e->atual == prim)
+            return -1;
         check = f_consultar_proxima_chave(&(e->fila[e->atual - 1]));
     }
     conta = f_obter_proxima_chave(&(e->fila[e->atual - 1]));
     e->cont--;
     if (e->cont == 0) {
-        e->atual++;
-        if (e->atual == 6) e->atual = 1;
+        _e_atualizar_atual(e);
         e->cont = e->num[e->atual - 1];
     }
     return conta;
@@ -109,7 +115,17 @@ int e_consultar_prox_qtde_oper (Escalonador *e) {
      * Returns: operacoes : int
      * 
     */
-    int operacoes = f_consultar_proximo_valor(&(e->fila[e->atual-1])); // Atribuímos o valor dentro do nó (quant. de operações) para o inteiro "operacoes"
+    int check, prim, operacoes;
+    check = f_consultar_proxima_chave(&(e->fila[e->atual - 1]));
+    prim = e->atual;
+    while (check == -1) {
+        _e_atualizar_atual(e);
+        if (prim == e->atual) {
+            return -1;
+        }
+        check = f_consultar_proxima_chave(&(e->fila[e->atual - 1]));
+    }
+    operacoes = f_consultar_proximo_valor(&(e->fila[e->atual-1])); // Atribuímos o valor dentro do nó (quant. de operações) para o inteiro "operacoes"
     return operacoes;
 }
 
@@ -210,14 +226,6 @@ int e_conf_por_arquivo(Escalonador *e, char *nome_arq_conf) {
     return 1;
 }
 
-int _e_pegar_prox_conta(Escalonador *e) {
-    int dado = e_obter_prox_num_conta(e);
-    while (dado == -1 && e_consultar_qtde_clientes(e) > 0) {
-        dado = e_obter_prox_num_conta(e);
-    }
-    return dado;
-}
-
 void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
     /**Descrição: Realiza a simulação e salva em um arquivo de saída
      * Autor: Diego, Gabriel e Tobias
@@ -259,6 +267,7 @@ void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
                 qtde_operacoes = e_consultar_prox_qtde_oper(e);
                 classe = e->atual;
                 conta = e_obter_prox_num_conta(e);
+                if (conta == -1) break;
                 operacoes[classe - 1] = operacoes[classe - 1] + qtde_operacoes;
                 atual = i + 1;
                 log_registrar(&registrador, conta, classe, timer, atual);
@@ -307,7 +316,7 @@ void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
     fprintf(arq_out,"Tempo medio de espera dos %d clientes Ouro: %.2f\n", log_obter_contagem_por_classe(&registrador, 2), log_media_por_classe(&registrador, 2));
     fprintf(arq_out,"Tempo medio de espera dos %d clientes Prata: %.2f\n", log_obter_contagem_por_classe(&registrador, 3), log_media_por_classe(&registrador, 3));
     fprintf(arq_out,"Tempo medio de espera dos %d clientes Bronze: %.2f\n", log_obter_contagem_por_classe(&registrador, 4), log_media_por_classe(&registrador, 4));
-    fprintf(arq_out,"Tempo medio de espera dos %d clientes Leezu: %.2f\n", log_obter_contagem_por_classe(&registrador, 5), log_media_por_classe(&registrador, 5));    
+    fprintf(arq_out,"Tempo medio de espera dos %d clientes Comuns: %.2f\n", log_obter_contagem_por_classe(&registrador, 5), log_media_por_classe(&registrador, 5));    
     fprintf(arq_out,"Quantidade media de operacoes por cliente Premium = %.2f\n", tempo_medias[0]);
     fprintf(arq_out,"Quantidade media de operacoes por cliente Ouro = %.2f\n", tempo_medias[1]);
     fprintf(arq_out,"Quantidade media de operacoes por cliente Prata = %.2f\n", tempo_medias[2]);

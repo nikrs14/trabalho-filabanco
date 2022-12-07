@@ -83,6 +83,7 @@ int e_obter_prox_num_conta(Escalonador *e) {
         if (e->atual == prim)
             return -1;
         check = f_consultar_proxima_chave(&(e->fila[e->atual - 1]));
+        e->cont = e->num[e->atual - 1];
     }
     conta = f_obter_proxima_chave(&(e->fila[e->atual - 1]));
     e->cont--;
@@ -124,6 +125,7 @@ int e_consultar_prox_qtde_oper (Escalonador *e) {
             return -1;
         }
         check = f_consultar_proxima_chave(&(e->fila[e->atual - 1]));
+        e->cont = e->num[e->atual - 1];
     }
     operacoes = f_consultar_proximo_valor(&(e->fila[e->atual-1])); // Atribuímos o valor dentro do nó (quant. de operações) para o inteiro "operacoes"
     return operacoes;

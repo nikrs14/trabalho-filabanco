@@ -5,7 +5,7 @@
 #include "./fila_fifo.h"
 #include "./escalonador.h"
 
-#define MAX_IO 50
+#define MAX_IO 20
 
 int main(int narg, char * argv[]) {
     Escalonador e;

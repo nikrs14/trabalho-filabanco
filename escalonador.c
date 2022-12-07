@@ -70,25 +70,21 @@ int e_obter_prox_num_conta(Escalonador *e) {
      * Returns: conta : int
      * 
     */
-    int check = f_consultar_proxima_chave(&(e->fila[e->atual -1]));
+    int check, conta;
+    check = f_consultar_proxima_chave(&(e->fila[e->atual - 1]));
     while (check == -1) {
         e->atual++;
-        if (e->atual == 6) {
-            e->atual = 1;
-        }
-        e->cont = e->num[e->atual-1];
-        check = f_consultar_proxima_chave(&(e->fila[e->atual -1]));
+        if (e->atual == 6) e->atual = 1;
+        check = f_consultar_proxima_chave(&(e->fila[e->atual - 1]));
     }
-    int conta = f_obter_proxima_chave(&(e->fila[e->atual -1])); // Atribuímos o valor da conta do cidadão baseando-se na chave que ele recebeu
-    e->cont--; // Diminuímos o contador visto que f_obter_proxima_chave já removeu o cidadão
-    if (e->cont == 0){ // Caso verdade, acabamos de retirar o último da fila, precisamos reinicializar o contador
-        e->atual++; // Aumentamos a classe, visto que analisaremos outra fila
-        if (e->atual == 6){ // Caso verdade, chegamos na última classe
-            e->atual = 1; // Com isso, retornamos a primeira classe e repetiremos o processo
-        }
-        e->cont = e->num[e->atual-1]; // Nosso contador recebe o novo número específico a nova fila
+    conta = f_obter_proxima_chave(&(e->fila[e->atual - 1]));
+    e->cont--;
+    if (e->cont == 0) {
+        e->atual++;
+        if (e->atual == 6) e->atual = 1;
+        e->cont = e->num[e->atual - 1];
     }
-    return conta; // Retornamos a conta, cumprindo o dever de nossa função
+    return conta;
 }
 
 int e_consultar_prox_num_conta (Escalonador *e) {

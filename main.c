@@ -7,6 +7,6 @@
 int main(int narg, char * argv[]) {
     Escalonador e;
     e_rodar(&e, "entrada-0001.txt", "nossa-saida-0001.txt");
-    // asdasd
+    // testando pq o git ta testando minha paciencia
     return EXIT_SUCCESS;
 }

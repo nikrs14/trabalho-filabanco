@@ -318,7 +318,7 @@ void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
     fprintf(arq_out,"Tempo medio de espera dos %d clientes Ouro: %.2f\n", log_obter_contagem_por_classe(&registrador, 2), log_media_por_classe(&registrador, 2));
     fprintf(arq_out,"Tempo medio de espera dos %d clientes Prata: %.2f\n", log_obter_contagem_por_classe(&registrador, 3), log_media_por_classe(&registrador, 3));
     fprintf(arq_out,"Tempo medio de espera dos %d clientes Bronze: %.2f\n", log_obter_contagem_por_classe(&registrador, 4), log_media_por_classe(&registrador, 4));
-    fprintf(arq_out,"Tempo medio de espera dos %d clientes Comuns: %.2f\n", log_obter_contagem_por_classe(&registrador, 5), log_media_por_classe(&registrador, 5));    
+    fprintf(arq_out,"Tempo medio de espera dos %d clientes Leezu: %.2f\n", log_obter_contagem_por_classe(&registrador, 5), log_media_por_classe(&registrador, 5));    
     fprintf(arq_out,"Quantidade media de operacoes por cliente Premium = %.2f\n", tempo_medias[0]);
     fprintf(arq_out,"Quantidade media de operacoes por cliente Ouro = %.2f\n", tempo_medias[1]);
     fprintf(arq_out,"Quantidade media de operacoes por cliente Prata = %.2f\n", tempo_medias[2]);

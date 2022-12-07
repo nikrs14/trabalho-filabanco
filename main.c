@@ -5,12 +5,21 @@
 #include "./fila_fifo.h"
 #include "./escalonador.h"
 
+#define MAX_IO 50
+
 int main(int narg, char * argv[]) {
     Escalonador e;
+    int numero;
+    char entrada[MAX_IO], saida[MAX_IO];
     if(narg == 1){
         puts("Nenhum parametro encontrado.");
         return EXIT_FAILURE;
     }
-    e_rodar(&e, argv[1], "saida-0000.txt");
+    numero = atoi(argv[1]);
+
+    sprintf(entrada, "entrada-%.4d.txt", numero);
+    sprintf(saida, "saida-%.4d.txt", numero);
+
+    e_rodar(&e, entrada, saida);
     return EXIT_SUCCESS;
 }

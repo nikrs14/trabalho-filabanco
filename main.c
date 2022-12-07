@@ -6,7 +6,10 @@
 
 int main(int narg, char * argv[]) {
     Escalonador e;
-    e_rodar(&e, "entrada-0002.txt", "nossa-saida-0002.txt");
-    // testando pq o git ta testando minha paciencia
+    if(narg == 1){
+        puts("Nenhum arquivo encontrado");
+        return EXIT_FAILURE;
+    }
+    e_rodar(&e, argv[1], argv[2]);
     return EXIT_SUCCESS;
 }

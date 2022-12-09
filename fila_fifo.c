@@ -34,14 +34,14 @@ int f_inserir(Fila_FIFO **F, int chave, int valor){
     temp->valor = valor;
     temp->prox = NULL;
     aux = *F;
-    if(*F == NULL) *F = temp;
+    if(*F == NULL) *F = temp; // Caso a vila esteja vazia, o cliente vai para a 1a posição
     else{
-        while( aux->prox != NULL){
-            if( aux->chave == chave)
+        while( aux->prox != NULL){ // Caso contrário, fazemos a análise ate achar o último ponto da fila
+            if( aux->chave == chave) // Caso a chave do cliente já esteja cadastrada, retornamos 0
                 return 0;
             aux = aux->prox;
         }
-        aux->prox = temp;
+        aux->prox = temp; // Cadastramos o cliente na ultima posição da fila
     }
     return 1;
 }
@@ -64,8 +64,8 @@ int f_obter_proxima_chave(Fila_FIFO **F){
     
     if(aux == NULL)
         return -1;
-    key = aux->chave;
-    (*F) = (*F)->prox;
+    key = aux->chave; // Retemos a chave da 1a posição da fila - a qual iremos remover
+    (*F) = (*F)->prox;  // Passamos a começar a fila apos a primeira posição, ou seja, removendo a 1a posição e tornando a 2a posição como inicializadora
     return key;  
 }
 
@@ -84,7 +84,7 @@ int f_consultar_proxima_chave(Fila_FIFO **F){
     
     if(aux == NULL)
         return -1;
-    return aux->chave;  
+    return aux->chave;  // Retornamos a 1a chave da fila
 }
 
 int f_consultar_proximo_valor(Fila_FIFO **F){
@@ -102,7 +102,7 @@ int f_consultar_proximo_valor(Fila_FIFO **F){
     
     if(aux == NULL)
         return -1;
-    return aux->valor;  
+    return aux->valor;   // Retornamos o 1o valor atribuído a fila
 }
 
 int f_num_elementos(Fila_FIFO **F){
@@ -118,9 +118,9 @@ int f_num_elementos(Fila_FIFO **F){
     */
     int num = 0;
     Fila_FIFO *aux = *F;
-    while(aux != NULL){
+    while(aux != NULL){ // Usamos este laço para achar a última posição da fila
         aux = aux->prox;
-        num++;
+        num++; // Passando posição por posição, vamos contabilizando o número de elementos por cada passagem
     }
     return num;
 }
@@ -143,9 +143,9 @@ int f_consultar_chave_por_posicao (Fila_FIFO **F, int posicao){
 
     if (posicao > f_num_elementos(F))
         return -1;
-    for(i = 0; i<(posicao-1); i++)
-        aux = aux->prox;
-    return aux->chave;
+    for(i = 0; i<(posicao-1); i++)      // Vamos até a posição anterior a posição requerida de fato
+        aux = aux->prox;                // Atualizamos o valor do auxiliar para o próximo
+    return aux->chave;                  // Retornamos a chave da ésima posição
 }
 
 int f_consultar_valor_por_posicao (Fila_FIFO **F, int posicao){
@@ -166,7 +166,7 @@ int f_consultar_valor_por_posicao (Fila_FIFO **F, int posicao){
 
     if (posicao > f_num_elementos(F))
         return -1;
-    for(i = 0; i<(posicao-1); i++)
-        aux = aux->prox;
-    return aux->valor;
+    for(i = 0; i<(posicao-1); i++)      // Vamos até a posição anterior a posição requerida de fato
+        aux = aux->prox;                // Atualizamos o valor do auxiliar para o próximo
+    return aux->valor;                  // Retornamos o valor da chave na ésima posição
 }

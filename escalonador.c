@@ -195,10 +195,11 @@ int e_conf_por_arquivo(Escalonador *e, char *nome_arq_conf) {
     char c[MAX_BUFFER_STR], nome_classe[MAX_NOME_CLASSE];
 
     fp = fopen(nome_arq_conf, "r");
-    if (fp == NULL)
+    if (fp == NULL)  // Checando caso o arquivo não exista
         return 0;
     
     while ((fgets(c, sizeof(c), fp)) != NULL) {
+        // Checamos as linhas iniciais
         if (i == 0) {
             sscanf(c, "qtde de caixas = %d", &temp_caixa);
         } else if (i == 1) {
@@ -221,7 +222,7 @@ int e_conf_por_arquivo(Escalonador *e, char *nome_arq_conf) {
             } else {
                 return 0;
             }
-            e_inserir_por_fila(e, temp_classe, temp_conta, temp_op);
+            e_inserir_por_fila(e, temp_classe, temp_conta, temp_op); // Inserimos o indivíduo na fila
         }
         i++;
     }
@@ -245,26 +246,26 @@ void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
     FILE *arq_out;
     int timer = 0, maior = 0;
     int caixas[10], operacoes[5], valores[10];
-    int i, qtde_operacoes, conta, classe, check, atual;
+    int i, qtde_operacoes, conta, classe, atual;
     float tempo_medias[5];
     arq_out = fopen(nome_arq_out, "w");
     e_conf_por_arquivo(e, nome_arq_in);
     log_inicializar(&registrador);
 
-    check = e_consultar_prox_num_conta(e);
-
+    // Inicializamos as caixas disponíveis e o número de pessoas que as usaram
     for (i = 0; i < e->caixas; i++) {
         caixas[i] = 1;
         valores[i] = 0;
     }
 
+    // Inicializamos o número de operações
     for (i = 0; i < 5; i++) {
         operacoes[i] = 0;
     }
     
     while (e_consultar_qtde_clientes(e) > 0) {
         for (i = 0; i < e->caixas; i++) {
-            caixas[i] = caixas[i] - 1;
+            caixas[i] = caixas[i] - 1;  // Caixa ocupada
             if (caixas[i] <= 0) {
                 qtde_operacoes = e_consultar_prox_qtde_oper(e);
                 classe = e->atual;
@@ -272,7 +273,8 @@ void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
                 if (conta == -1) break;
                 operacoes[classe - 1] = operacoes[classe - 1] + qtde_operacoes;
                 atual = i + 1;
-                log_registrar(&registrador, conta, classe, timer, atual);
+                log_registrar(&registrador, conta, classe, timer, atual);  // Registrando na árvore
+                // Printando os valores
                 switch (classe) {
                     case 1:
                         fprintf(arq_out, "T = %d min: Caixa %d chama da categoria Premium cliente da conta %d para realizar %d operacao(oes).\n", timer, atual, conta, qtde_operacoes);
@@ -292,15 +294,14 @@ void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
                     default:
                         break;
                 }
-                caixas[i] = qtde_operacoes*e->delta_t;
+                caixas[i] = qtde_operacoes*e->delta_t; // Tempo decorrido
                 valores[i] = valores[i] + 1;
             }
         }
         timer++;
-        check = e_consultar_prox_num_conta(e);
     } timer--;
     
-
+    // Atualizando o tempo da última caixa a ser finalizada
     for (i = 0; i < e->caixas; i++) {
         if (maior < caixas[i]) {
             maior = caixas[i];
@@ -309,10 +310,12 @@ void e_rodar(Escalonador *e, char *nome_arq_in, char *nome_arq_out) {
 
     timer = timer + maior;
 
+    // Calculando a média de tempo
     for (i = 0; i < 5; i++) {
         tempo_medias[i] = ((float) operacoes[i])/((float) log_obter_contagem_por_classe(&registrador, i+1));
     }
 
+    // Printando as informações finais
     fprintf(arq_out, "Tempo total de atendimento: %d minutos.\n", timer);
     fprintf(arq_out,"Tempo medio de espera dos %d clientes Premium: %.2f\n", log_obter_contagem_por_classe(&registrador, 1), log_media_por_classe(&registrador, 1));
     fprintf(arq_out,"Tempo medio de espera dos %d clientes Ouro: %.2f\n", log_obter_contagem_por_classe(&registrador, 2), log_media_por_classe(&registrador, 2));

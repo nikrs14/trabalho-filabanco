@@ -1,3 +1,13 @@
+/*
+*----------------------------*------------*
+| Autores                    | Matrículas |
+*----------------------------*------------*
+| Antônio Gabriel Carmo Rego | 539628     |
+| Diego Rabelo de Sá         | 539664     |
+| Tobias Nóbrega de Freitas  | 540876     |
+*----------------------------*------------*
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
